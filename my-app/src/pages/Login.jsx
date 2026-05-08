@@ -1,44 +1,78 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { apiGet } from "../api/api";
+
+import {
+  useNavigate,
+  Link,
+} from "react-router-dom";
+
+import { apiGet }
+from "../api/api";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate();
+  const [username,
+    setUsername] =
+    useState("");
+
+  const [password,
+    setPassword] =
+    useState("");
+
+  const [showPassword,
+    setShowPassword] =
+    useState(false);
+
+  const [error,
+    setError] =
+    useState("");
+
+  const navigate =
+    useNavigate();
 
   async function handleLogin(e) {
+
     e.preventDefault();
 
     setError("");
 
+    if (
+      !username.trim() ||
+      !password.trim()
+    ) {
+
+      setError(
+        "Fill all fields"
+      );
+
+      return;
+    }
+
     try {
-      const serverUsers = await apiGet("/users");
 
-      const localUsers =
-        JSON.parse(localStorage.getItem("users")) || [];
+      const users =
+        await apiGet("/users");
 
-      const allUsers = [...serverUsers, ...localUsers];
+      const foundUser =
+        users.find((user) =>
 
-      const foundUser = allUsers.find((user) => {
-        if (user.password) {
-          return (
-            user.username === username &&
-            user.password === password
-          );
-        }
+          user.username ===
+            username &&
 
-        return (
-          user.username === username &&
-          user.website === password
+          (
+            user.password ===
+              password ||
+
+            user.website ===
+              password
+          )
         );
-      });
 
       if (!foundUser) {
-        setError("Invalid username or password");
+
+        setError(
+          "Invalid username or password"
+        );
+
         return;
       }
 
@@ -48,29 +82,53 @@ export default function Login() {
       );
 
       navigate("/home");
-    } catch (err) {
-      setError("Login failed");
+
+    } catch {
+
+      setError(
+        "Login failed"
+      );
     }
   }
 
   return (
-    <div className="page">
-      <div className="card">
-        <h1>Login</h1>
 
-        <form onSubmit={handleLogin}>
+    <div className="page">
+
+      <div className="card">
+
+        <h1>
+          Login
+        </h1>
+
+        <form
+          onSubmit={handleLogin}
+        >
+
           <input
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) =>
+              setUsername(
+                e.target.value
+              )
+            }
           />
 
           <input
-            type={showPassword ? "text" : "password"}
+            type={
+              showPassword
+                ? "text"
+                : "password"
+            }
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(
+                e.target.value
+              )
+            }
           />
 
           <button
@@ -86,12 +144,23 @@ export default function Login() {
               : "Show"}
           </button>
 
-          <button type="submit">
+          <br />
+          <br />
+
+          <button
+            type="submit"
+          >
             Login
           </button>
+
         </form>
 
-        {error && <p className="error">{error}</p>}
+        {error && (
+
+          <p className="error">
+            {error}
+          </p>
+        )}
 
         <p>
           Don't have an account?
@@ -100,7 +169,9 @@ export default function Login() {
         <Link to="/register">
           Register
         </Link>
+
       </div>
+
     </div>
   );
 }

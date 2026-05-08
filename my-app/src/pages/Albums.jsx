@@ -23,20 +23,11 @@ export default function Albums() {
     useState(null);
 
   const [search, setSearch] =
-    useState(
-      localStorage.getItem(
-        "albumsSearch"
-      ) || ""
-    );
+    useState("");
 
-  const [visibleCount, setVisibleCount] =
-    useState(
-      Number(
-        localStorage.getItem(
-          "visiblePhotosCount"
-        )
-      ) || 5
-    );
+  const [visibleCount,
+    setVisibleCount] =
+    useState(5);
 
   const currentUser = JSON.parse(
     localStorage.getItem(
@@ -46,69 +37,26 @@ export default function Albums() {
 
   useEffect(() => {
 
-    localStorage.setItem(
-      "albumsSearch",
-      search
-    );
-
-  }, [search]);
-
-  useEffect(() => {
-
-    localStorage.setItem(
-      "visiblePhotosCount",
-      visibleCount
-    );
-
-  }, [visibleCount]);
-
-  useEffect(() => {
-
-    if (selectedAlbum) {
-
-      localStorage.setItem(
-        "selectedAlbum",
-        JSON.stringify(selectedAlbum)
-      );
-
-    }
-
-  }, [selectedAlbum]);
-
-  useEffect(() => {
-
     if (!currentUser) return;
 
-    loadAlbums(currentUser.id);
+    loadAlbums();
 
-    const savedAlbum =
-      localStorage.getItem(
-        "selectedAlbum"
-      );
-
-    if (savedAlbum) {
-
-      const parsedAlbum =
-        JSON.parse(savedAlbum);
-
-      selectAlbum(parsedAlbum);
-    }
   }, []);
 
-  // LOAD ALBUMS
-  async function loadAlbums(userId) {
+  async function loadAlbums() {
 
     const data = await apiGet(
-      `/albums?userId=${userId}`
+      `/albums?userId=${currentUser.id}`
     );
 
     setAlbums(data);
   }
 
-  // SELECT ALBUM
   async function selectAlbum(album) {
 
-    if (!album?.id) return;
+    if (!album?.id) {
+      return;
+    }
 
     setSelectedAlbum(album);
 
@@ -121,7 +69,6 @@ export default function Albums() {
     setVisibleCount(5);
   }
 
-  // ADD ALBUM
   async function addAlbum() {
 
     const title = prompt(
@@ -132,24 +79,61 @@ export default function Albums() {
       return;
     }
 
+    if (title.length < 2) {
+
+      alert(
+        "Album title too short"
+      );
+
+      return;
+    }
+
     const newAlbum = {
       userId: currentUser.id,
       title,
     };
 
-    const savedAlbum =
-      await apiPost(
-        "/albums",
-        newAlbum
-      );
+    await apiPost(
+      "/albums",
+      newAlbum
+    );
 
-    setAlbums((prev) => [
-      savedAlbum,
-      ...prev,
-    ]);
+    await loadAlbums();
   }
 
-  // DELETE ALBUM
+  async function updateAlbum(album) {
+
+    const title = prompt(
+      "New album title:",
+      album.title
+    );
+
+    if (!title?.trim()) {
+      return;
+    }
+
+    const updatedAlbum = {
+      ...album,
+      title,
+    };
+
+    await apiPut(
+      `/albums/${album.id}`,
+      updatedAlbum
+    );
+
+    await loadAlbums();
+
+    if (
+      selectedAlbum?.id ===
+      album.id
+    ) {
+      setSelectedAlbum(
+        updatedAlbum
+      );
+    }
+  }
+
   async function deleteAlbum(id) {
 
     await apiDelete(
@@ -170,10 +154,9 @@ export default function Albums() {
     }
   }
 
-  // ADD PHOTO
   async function addPhoto() {
 
-    if (!selectedAlbum) {
+    if (!selectedAlbum?.id) {
       return;
     }
 
@@ -192,11 +175,19 @@ export default function Albums() {
       return;
     }
 
-    if (!selectedAlbum?.id) { // just in case
+    if (
+      !url.startsWith("http")
+    ) {
+
+      alert(
+        "Invalid URL"
+      );
+
       return;
     }
 
     const newPhoto = {
+
       albumId:
         selectedAlbum.id,
 
@@ -207,19 +198,16 @@ export default function Albums() {
       thumbnailUrl: url,
     };
 
-    const savedPhoto =
-      await apiPost(
-        "/photos",
-        newPhoto
-      );
+    await apiPost(
+      "/photos",
+      newPhoto
+    );
 
-    setPhotos((prev) => [
-      savedPhoto,
-      ...prev,
-    ]);
+    await selectAlbum(
+      selectedAlbum
+    );
   }
 
-  // DELETE PHOTO
   async function deletePhoto(id) {
 
     await apiDelete(
@@ -233,7 +221,6 @@ export default function Albums() {
     );
   }
 
-  // UPDATE PHOTO
   async function updatePhoto(photo) {
 
     const title = prompt(
@@ -255,16 +242,11 @@ export default function Albums() {
       updatedPhoto
     );
 
-    setPhotos((prev) =>
-      prev.map((p) =>
-        p.id === photo.id
-          ? updatedPhoto
-          : p
-      )
+    await selectAlbum(
+      selectedAlbum
     );
   }
 
-  // SEARCH
   const filteredAlbums =
     albums.filter((album) => {
 
@@ -272,6 +254,7 @@ export default function Albums() {
         search.toLowerCase();
 
       return (
+
         album.title
           .toLowerCase()
           .includes(text) ||
@@ -282,9 +265,12 @@ export default function Albums() {
     });
 
   return (
+
     <div>
 
-      <h1>Albums</h1>
+      <h1>
+        Albums
+      </h1>
 
       <button
         onClick={addAlbum}
@@ -307,7 +293,6 @@ export default function Albums() {
 
       <hr />
 
-      {/* ALBUMS LIST */}
       {filteredAlbums.map(
         (album) => (
 
@@ -324,30 +309,32 @@ export default function Albums() {
               selectAlbum(album)
             }
           >
-            {album.id} -{" "}
             {album.title}
           </button>
 
-          {album.userId ===
-            currentUser.id && (
+          <button
+            onClick={() =>
+              updateAlbum(album)
+            }
+          >
+            Edit
+          </button>
 
-            <button
-              onClick={() =>
-                deleteAlbum(
-                  album.id
-                )
-              }
-            >
-              Delete
-            </button>
-          )}
+          <button
+            onClick={() =>
+              deleteAlbum(
+                album.id
+              )
+            }
+          >
+            Delete
+          </button>
 
         </div>
       ))}
 
       <hr />
 
-      {/* SELECTED ALBUM */}
       {selectedAlbum && (
 
         <div>
