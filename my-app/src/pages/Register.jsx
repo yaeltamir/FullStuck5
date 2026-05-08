@@ -21,6 +21,13 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
+    if (password.length < 4) {
+      setError(
+        "Password too short"
+      );
+      return;
+    }
+
     if (!username.trim() || !password.trim() || !verify.trim()) {
       setError("יש למלא את כל השדות");
       return;
@@ -49,6 +56,13 @@ export default function Register() {
   function finishRegister(e) {
     e.preventDefault();
     setError("");
+
+    if (!email.includes("@")) {
+      setError(
+        "Invalid email"
+      );
+      return;
+    }
 
     if (!name.trim() || !email.trim()) {
       setError("שם מלא ואימייל הם שדות חובה");

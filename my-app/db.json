@@ -10,8 +10,20 @@
     {
       "userId": 1778231085943,
       "title": "מה קורה כאן?",
-      "completed": false,
+      "completed": true,
       "id": "01AIqz30xOc"
+    },
+    {
+      "userId": 1778231085943,
+      "title": "אב",
+      "completed": true,
+      "id": "NK776nqq1DU"
+    },
+    {
+      "userId": 1778231085943,
+      "title": "גדה",
+      "completed": false,
+      "id": "X5MdzSnw1aY"
     }
   ],
   "posts": [
@@ -56,6 +68,18 @@
       "title": "בדיקה הא את הפוסטים שלי אני יכולה לערוך",
       "body": "הצלחה עובד",
       "id": "SjnXg4ecoBY"
+    },
+    {
+      "userId": 1778238588453,
+      "title": "פוסט ראשון שלי",
+      "body": "הי אבריבאדי",
+      "id": "oqqTBwdKMWU"
+    },
+    {
+      "userId": 1778231085943,
+      "title": "new post",
+      "body": "  do u see me? and what about the edit?",
+      "id": "J0ygw8dSIPU"
     }
   ],
   "comments": [
@@ -106,6 +130,54 @@
       "email": "יעל@gmail.com",
       "body": "מגניבבב",
       "id": "XE0_2Z1Nv7g"
+    },
+    {
+      "postId": "SjnXg4ecoBY",
+      "userId": 1778238588453,
+      "name": "נעה",
+      "email": "n@gmail.com",
+      "body": "בדיקה דוצ",
+      "id": "atPwxP2b9Ns"
+    },
+    {
+      "postId": "SjnXg4ecoBY",
+      "userId": 1778231085943,
+      "name": "יעל",
+      "email": "יעל@gmail.com",
+      "body": "רות עבור",
+      "id": "aSU3rdNxdPg"
+    },
+    {
+      "postId": "oqqTBwdKMWU",
+      "userId": 1778231085943,
+      "name": "יעל",
+      "email": "יעל@gmail.com",
+      "body": "הי טויוטו - אבל רק אחרי שנכנסי מחדש רואי לבדוק א זה סבבה?",
+      "id": "ud6aj-0U2tI"
+    },
+    {
+      "postId": "u5u1EkKNq6o",
+      "userId": 1778238588453,
+      "name": "נעה",
+      "email": "n@gmail.com",
+      "body": "אוי",
+      "id": "KPEgW0rn_wg"
+    },
+    {
+      "postId": "u5u1EkKNq6o",
+      "userId": 1778231085943,
+      "name": "יעל",
+      "email": "יעל@gmail.com",
+      "body": "קיצר לא עזר",
+      "id": "y7jzMQr43is"
+    },
+    {
+      "postId": "J0ygw8dSIPU",
+      "userId": 1778238588453,
+      "name": "נעה",
+      "email": "n@gmail.com",
+      "body": "when i ref i see",
+      "id": "CHQ4Jx85xrs"
     }
   ],
   "albums": [
@@ -118,11 +190,6 @@
       "userId": 1778231085943,
       "title": "למה אי אפשר לערוך תמונות?",
       "id": "ZBvhf3TwAb0"
-    },
-    {
-      "userId": 1778231085943,
-      "title": "גורורוור",
-      "id": "_nXdLbfjzEI"
     }
   ],
   "photos": [
@@ -134,14 +201,7 @@
       "id": "M2KEJBypTRw"
     },
     {
-      "albumId": "ApWf9DIu4w0",
-      "title": "עובד",
-      "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
-      "thumbnailUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
-      "id": "2_RYGC-6J2I"
-    },
-    {
-      "albumId": "_nXdLbfjzEI",
+      "albumId": null,
       "title": "עובד אבל אי אפשר לערוך שם של אלבו של תמונה אפשר",
       "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
       "thumbnailUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",

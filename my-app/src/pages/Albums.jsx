@@ -192,6 +192,10 @@ export default function Albums() {
       return;
     }
 
+    if (!selectedAlbum?.id) { // just in case
+      return;
+    }
+
     const newPhoto = {
       albumId:
         selectedAlbum.id,

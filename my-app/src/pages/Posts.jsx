@@ -83,6 +83,7 @@ export default function Posts() {
 
     setNewTitle("");
     setNewBody("");
+    await loadPosts();
   }
 
   async function deletePost(id) {
@@ -175,6 +176,7 @@ export default function Posts() {
     ]);
 
     setNewComment("");
+    await selectPost(selectedPost);  // refresh comments - only when doing something 
   }
 
   async function deleteComment(id) {

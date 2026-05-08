@@ -6,6 +6,7 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -66,11 +67,24 @@ export default function Login() {
           />
 
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
+          <button
+            type="button"
+            onClick={() =>
+              setShowPassword(
+                !showPassword
+              )
+            }
+          >
+            {showPassword
+              ? "Hide"
+              : "Show"}
+          </button>
 
           <button type="submit">
             Login
