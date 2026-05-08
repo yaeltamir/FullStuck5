@@ -1,13 +1,23 @@
+import {
+  Outlet,
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 
 export default function Home() {
+
   const [user, setUser] = useState(null);
-  const [showInfo, setShowInfo] = useState(false);
+
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("currentUser");
+
+    const savedUser =
+      localStorage.getItem("currentUser");
 
     if (!savedUser) {
       navigate("/login");
@@ -15,55 +25,149 @@ export default function Home() {
     }
 
     setUser(JSON.parse(savedUser));
+
   }, [navigate]);
 
-  function handleLogout() {
+  function logout() {
+
     localStorage.removeItem("currentUser");
+
     navigate("/login");
   }
 
-  if (!user) {
-    return <p>Loading...</p>;
+  function editUser() {
+
+    const newName = prompt(
+      "Name:",
+      user.name
+    );
+
+    const newEmail = prompt(
+      "Email:",
+      user.email
+    );
+
+    const newPhone = prompt(
+      "Phone:",
+      user.phone
+    );
+
+    if (
+      !newName?.trim() ||
+      !newEmail?.trim()
+    ) {
+      return;
+    }
+
+    const updatedUser = {
+      ...user,
+      name: newName,
+      email: newEmail,
+      phone: newPhone,
+    };
+
+    setUser(updatedUser);
+
+    localStorage.setItem(
+      "currentUser",
+      JSON.stringify(updatedUser)
+    );
+
+    const users =
+      JSON.parse(
+        localStorage.getItem("users")
+      ) || [];
+
+    const updatedUsers =
+      users.map((u) =>
+        u.id === updatedUser.id
+          ? updatedUser
+          : u
+      );
+
+    localStorage.setItem(
+      "users",
+      JSON.stringify(updatedUsers)
+    );
   }
 
+  if (!user) return null;
+
   return (
-    <div>
-      <h1>Welcome, {user.name}</h1>
+    <div className="layout">
 
-      <nav>
-        <button onClick={() => setShowInfo(!showInfo)}>Info</button>
+      <aside className="sidebar">
 
-        <Link to="/todos">Todos</Link>{" | "}
-        <Link to="/posts">Posts</Link>{" | "}
-        <Link to="/albums">Albums</Link>{" | "}
+        <h2>Dashboard</h2>
 
-        <button onClick={handleLogout}>Logout</button>
-      </nav>
+        <Link to="/home">
+          Home
+        </Link>
 
-      {showInfo && (
-        <div>
-          <h2>User Info</h2>
-          <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Username:</strong> {user.username}</p>
-          <p><strong>Email:</strong> {user.email || "N/A"}</p>
-          <p><strong>Phone:</strong> {user.phone || "N/A"}</p>
-          <p><strong>Website:</strong> {user.website}</p>
+        <Link to="/todos">
+          Todos
+        </Link>
 
-          {user.address && (
-            <>
-              <h3>Address</h3>
-              <p>{user.address.street}, {user.address.city}</p>
-            </>
-          )}
+        <Link to="/posts">
+          Posts
+        </Link>
 
-          {user.company && (
-            <>
-              <h3>Company</h3>
-              <p>{user.company.name}</p>
-            </>
-          )}
-        </div>
-      )}
+        <Link to="/albums">
+          Albums
+        </Link>
+
+        <button onClick={logout}>
+          Logout
+        </button>
+
+      </aside>
+
+      <main className="content">
+
+        <h1>
+          Welcome {user.name}
+        </h1>
+
+        <p>
+          Current Page:
+          {location.pathname}
+        </p>
+
+        {location.pathname === "/home" && (
+
+          <div className="card">
+
+            <h2>User Info</h2>
+
+            <p>
+              <b>Name:</b> {user.name}
+            </p>
+
+            <p>
+              <b>Email:</b> {user.email}
+            </p>
+
+            <p>
+              <b>Phone:</b> {user.phone}
+            </p>
+
+            <p>
+              <b>Username:</b> {user.username}
+            </p>
+
+            <button
+              onClick={editUser}
+            >
+              Edit Profile
+            </button>
+
+          </div>
+        )}
+
+        <Outlet />
+
+      </main>
+
     </div>
   );
 }

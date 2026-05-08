@@ -1,52 +1,99 @@
 import { useEffect, useState } from "react";
-import { apiGet } from "../api/api";
+
+import {
+  apiGet,
+  apiPost,
+  apiDelete,
+  apiPut,
+} from "../api/api";
 
 export default function Posts() {
+
   const [posts, setPosts] = useState([]);
-  const [selectedPost, setSelectedPost] = useState(null);
+  const [selectedPost, setSelectedPost] =
+    useState(null);
+
   const [comments, setComments] = useState([]);
 
   const [search, setSearch] = useState("");
-  const [newTitle, setNewTitle] = useState("");
-  const [newBody, setNewBody] = useState("");
-  const [newComment, setNewComment] = useState("");
+
+  const [newTitle, setNewTitle] =
+    useState("");
+
+  const [newBody, setNewBody] =
+    useState("");
+
+  const [newComment, setNewComment] =
+    useState("");
+
+  const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+  );
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    if (!user) return;
 
-    loadPosts(user.id);
+    loadPosts();
+
   }, []);
 
-  async function loadPosts(userId) {
-    const data = await apiGet(`/posts?userId=${userId}`);
+  async function loadPosts() {
+
+    const data = await apiGet(
+      "/posts"
+    );
+
     setPosts(data);
   }
 
   async function selectPost(post) {
+
     setSelectedPost(post);
-    const data = await apiGet(`/comments?postId=${post.id}`);
+
+    const data = await apiGet(
+      `/comments?postId=${post.id}`
+    );
+
     setComments(data);
   }
 
-  function addPost() {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    if (!newTitle.trim() || !newBody.trim() || !user) return;
+  async function addPost() {
+
+    if (
+      !newTitle.trim() ||
+      !newBody.trim()
+    ) {
+      return;
+    }
 
     const post = {
-      userId: user.id,
-      id: Date.now(),
+      userId: currentUser.id,
       title: newTitle,
       body: newBody,
     };
 
-    setPosts([post, ...posts]);
+    const savedPost = await apiPost(
+      "/posts",
+      post
+    );
+
+    setPosts((prev) => [
+      savedPost,
+      ...prev,
+    ]);
+
     setNewTitle("");
     setNewBody("");
   }
 
-  function deletePost(id) {
-    setPosts(posts.filter((p) => p.id !== id));
+  async function deletePost(id) {
+
+    await apiDelete(
+      `/posts/${id}`
+    );
+
+    setPosts((prev) =>
+      prev.filter((p) => p.id !== id)
+    );
 
     if (selectedPost?.id === id) {
       setSelectedPost(null);
@@ -54,76 +101,166 @@ export default function Posts() {
     }
   }
 
-  function updatePost(id) {
-    const post = posts.find((p) => p.id === id);
-    if (!post) return;
+  async function updatePost(id) {
 
-    const title = prompt("New title:", post.title);
-    const body = prompt("New body:", post.body);
+    const post = posts.find(
+      (p) => p.id === id
+    );
 
-    if (!title?.trim() || !body?.trim()) return;
+    const title = prompt(
+      "New title:",
+      post.title
+    );
 
-    const updated = { ...post, title, body };
+    const body = prompt(
+      "New body:",
+      post.body
+    );
 
-    setPosts(posts.map((p) => (p.id === id ? updated : p)));
-
-    if (selectedPost?.id === id) {
-      setSelectedPost(updated);
+    if (
+      !title?.trim() ||
+      !body?.trim()
+    ) {
+      return;
     }
-  }
 
-  function addComment() {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    if (!newComment.trim() || !selectedPost || !user) return;
-
-    const comment = {
-      id: Date.now(),
-      postId: selectedPost.id,
-      userId: user.id,
-      name: user.name,
-      body: newComment,
-      ownedByCurrentUser: true,
+    const updatedPost = {
+      ...post,
+      title,
+      body,
     };
 
-    setComments([comment, ...comments]);
+    await apiPut(
+      `/posts/${id}`,
+      updatedPost
+    );
+
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? updatedPost
+          : p
+      )
+    );
+
+    setSelectedPost(updatedPost);
+  }
+
+  async function addComment() {
+
+    if (
+      !newComment.trim() ||
+      !selectedPost
+    ) {
+      return;
+    }
+
+    const comment = {
+      postId: selectedPost.id,
+      userId: currentUser.id,
+      name: currentUser.name,
+      email: currentUser.email,
+      body: newComment,
+    };
+
+    const savedComment =
+      await apiPost(
+        "/comments",
+        comment
+      );
+
+    setComments((prev) => [
+      savedComment,
+      ...prev,
+    ]);
+
     setNewComment("");
   }
 
-  function deleteComment(id) {
-    setComments(comments.filter((c) => c.id !== id));
+  async function deleteComment(id) {
+
+    await apiDelete(
+      `/comments/${id}`
+    );
+
+    setComments((prev) =>
+      prev.filter((c) => c.id !== id)
+    );
   }
 
-  function updateComment(id) {
-    const comment = comments.find((c) => c.id === id);
-    if (!comment) return;
+  async function updateComment(id) {
 
-    const body = prompt("New comment:", comment.body);
-    if (!body?.trim()) return;
+    const comment = comments.find(
+      (c) => c.id === id
+    );
 
-    setComments(
-      comments.map((c) =>
-        c.id === id ? { ...c, body } : c
+    const body = prompt(
+      "New comment:",
+      comment.body
+    );
+
+    if (!body?.trim()) {
+      return;
+    }
+
+    const updatedComment = {
+      ...comment,
+      body,
+    };
+
+    await apiPut(
+      `/comments/${id}`,
+      updatedComment
+    );
+
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === id
+          ? updatedComment
+          : c
       )
     );
   }
 
-  const filteredPosts = posts.filter((post) => {
-    const text = search.toLowerCase();
+  const filteredPosts =
+    posts.filter((post) => {
 
-    return (
-      post.title.toLowerCase().includes(text) ||
-      String(post.id).includes(text)
+      const text =
+        search.toLowerCase();
+
+      return (
+        post.title
+          .toLowerCase()
+          .includes(text) ||
+
+        String(post.id)
+          .includes(text)
+      );
+    });
+
+  const myPosts =
+    filteredPosts.filter(
+      (p) =>
+        p.userId === currentUser.id
     );
-  });
+
+  const communityPosts =
+    filteredPosts.filter(
+      (p) =>
+        p.userId !== currentUser.id
+    );
 
   return (
     <div>
+
       <h1>Posts</h1>
 
       <input
-        placeholder="Search by id/title..."
+        placeholder="Search..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
       />
 
       <hr />
@@ -133,73 +270,176 @@ export default function Posts() {
       <input
         placeholder="Title"
         value={newTitle}
-        onChange={(e) => setNewTitle(e.target.value)}
+        onChange={(e) =>
+          setNewTitle(e.target.value)
+        }
       />
 
+      <br />
       <br />
 
       <textarea
         placeholder="Body"
         value={newBody}
-        onChange={(e) => setNewBody(e.target.value)}
+        onChange={(e) =>
+          setNewBody(e.target.value)
+        }
       />
 
       <br />
+      <br />
 
-      <button onClick={addPost}>Add Post</button>
+      <button onClick={addPost}>
+        Add Post
+      </button>
 
       <hr />
 
-      <h2>Posts List</h2>
+      <h2>My Posts</h2>
 
-      {filteredPosts.map((post) => (
+      {myPosts.map((post) => (
+
         <div key={post.id}>
-          <button onClick={() => selectPost(post)}>
+
+          <button
+            onClick={() =>
+              selectPost(post)
+            }
+          >
             {post.id} - {post.title}
           </button>
 
-          <button onClick={() => updatePost(post.id)}>Update</button>
-          <button onClick={() => deletePost(post.id)}>Delete</button>
+          <button
+            onClick={() =>
+              updatePost(post.id)
+            }
+          >
+            Edit
+          </button>
+
+          <button
+            onClick={() =>
+              deletePost(post.id)
+            }
+          >
+            Delete
+          </button>
+
+        </div>
+      ))}
+
+      <hr />
+
+      <h2>Community Posts</h2>
+
+      {communityPosts.map((post) => (
+
+        <div key={post.id}>
+
+          <button
+            onClick={() =>
+              selectPost(post)
+            }
+          >
+            {post.id} - {post.title}
+          </button>
+
         </div>
       ))}
 
       <hr />
 
       {selectedPost && (
+
         <div>
-          <h2>Selected Post</h2>
-          <h3>{selectedPost.title}</h3>
-          <p>{selectedPost.body}</p>
+
+          <h2>
+            {selectedPost.title}
+          </h2>
+
+          <p>
+            {selectedPost.body}
+          </p>
+
+          <hr />
 
           <h3>Comments</h3>
 
           <input
             placeholder="Add comment..."
             value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
+            onChange={(e) =>
+              setNewComment(
+                e.target.value
+              )
+            }
           />
 
-          <button onClick={addComment}>Add Comment</button>
+          <button
+            onClick={addComment}
+          >
+            Add Comment
+          </button>
+
+          <br />
+          <br />
 
           {comments.map((comment) => (
-            <div key={comment.id}>
-              <p>{comment.body}</p>
 
-              {comment.ownedByCurrentUser && (
+            <div
+              key={comment.id}
+              style={{
+                border:
+                  "1px solid lightgray",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
+            >
+
+              <p>
+                <b>
+                  {comment.name}
+                </b>
+              </p>
+
+              <p>
+                {comment.body}
+              </p>
+
+              {comment.userId ===
+                currentUser.id && (
+
                 <>
-                  <button onClick={() => updateComment(comment.id)}>
-                    Update Comment
+
+                  <button
+                    onClick={() =>
+                      updateComment(
+                        comment.id
+                      )
+                    }
+                  >
+                    Edit
                   </button>
 
-                  <button onClick={() => deleteComment(comment.id)}>
-                    Delete Comment
+                  <button
+                    onClick={() =>
+                      deleteComment(
+                        comment.id
+                      )
+                    }
+                  >
+                    Delete
                   </button>
+
                 </>
               )}
+
             </div>
           ))}
+
         </div>
       )}
+
     </div>
   );
 }

@@ -1,0 +1,152 @@
+{
+  "users": [],
+  "todos": [
+    {
+      "userId": 1778173556414,
+      "title": "פוסט 2",
+      "completed": true,
+      "id": "wTvS_ZUrWT8"
+    },
+    {
+      "userId": 1778231085943,
+      "title": "מה קורה כאן?",
+      "completed": false,
+      "id": "01AIqz30xOc"
+    }
+  ],
+  "posts": [
+    {
+      "userId": 1778166841191,
+      "title": "111111111",
+      "body": "111111",
+      "id": "VcTVpJwqeSk"
+    },
+    {
+      "userId": 1778166841191,
+      "title": "222222",
+      "body": "222222",
+      "id": "_Nhnovef4eQ"
+    },
+    {
+      "userId": 1778173556414,
+      "title": "נעה",
+      "body": "פוסט 1",
+      "id": "7Yx3e-kBOKA"
+    },
+    {
+      "userId": 1778173556414,
+      "title": "למה אני לא רואה את הפוסטים?",
+      "body": "בעיה א",
+      "id": "u5u1EkKNq6o"
+    },
+    {
+      "userId": 1778173556414,
+      "title": "בדיקת תגובות?",
+      "body": "וגם האם ולמי ניתן להגיב",
+      "id": "D3ksOLMzBWA"
+    },
+    {
+      "userId": 1778166841191,
+      "title": "אינפו",
+      "body": "מהרגע שבוחרי באינפו הוא תקוע בכל העמודים בראש ",
+      "id": "ZNDiBhCzhZM"
+    },
+    {
+      "userId": 1778231085943,
+      "title": "בדיקה הא את הפוסטים שלי אני יכולה לערוך",
+      "body": "הצלחה עובד",
+      "id": "SjnXg4ecoBY"
+    }
+  ],
+  "comments": [
+    {
+      "postId": "_Nhnovef4eQ",
+      "userId": 1778166841191,
+      "name": "Yael Tamir",
+      "email": "yaeltamir46@gmail.com",
+      "body": "nnnn",
+      "id": "ErkIKPQ-T2M"
+    },
+    {
+      "postId": "D3ksOLMzBWA",
+      "userId": 1778173556414,
+      "name": "נעה טמיר",
+      "email": "n@",
+      "body": "אפשר להגיב בלחיצה על הפוסט נבדוק האם בטעינה של התחהרות מחדש כן רואים פוסטים?",
+      "id": "Pm6BIRsc3co"
+    },
+    {
+      "postId": "VcTVpJwqeSk",
+      "userId": 1778166841191,
+      "name": "Yael Tamir",
+      "email": "yaeltamir46@gmail.com",
+      "body": "אנירואה בחשבון הזה את הפוסטים שלי מוזר",
+      "id": "i8JyFhl6xFw"
+    },
+    {
+      "postId": "ZNDiBhCzhZM",
+      "userId": 1778166841191,
+      "name": "Yael Tamir",
+      "email": "yaeltamir46@gmail.com",
+      "body": "ולמה אני לא אמורה לראות ג פוסטים אחרים איך זה עובד.?",
+      "id": "SaZYNkRAxfU"
+    },
+    {
+      "postId": "ZNDiBhCzhZM",
+      "userId": 1778166841191,
+      "name": "Yael Tamir",
+      "email": "yaeltamir46@gmail.com",
+      "body": "לא היתה פה תגובה?",
+      "id": "WgYvuuqywVA"
+    },
+    {
+      "postId": "VcTVpJwqeSk",
+      "userId": 1778231085943,
+      "name": "יעל",
+      "email": "יעל@gmail.com",
+      "body": "מגניבבב",
+      "id": "XE0_2Z1Nv7g"
+    }
+  ],
+  "albums": [
+    {
+      "userId": 1778231085943,
+      "title": "הבעיה של האלבומים",
+      "id": "ApWf9DIu4w0"
+    },
+    {
+      "userId": 1778231085943,
+      "title": "למה אי אפשר לערוך תמונות?",
+      "id": "ZBvhf3TwAb0"
+    },
+    {
+      "userId": 1778231085943,
+      "title": "גורורוור",
+      "id": "_nXdLbfjzEI"
+    }
+  ],
+  "photos": [
+    {
+      "albumId": "ZBvhf3TwAb0",
+      "title": "סריגה",
+      "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
+      "thumbnailUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
+      "id": "M2KEJBypTRw"
+    },
+    {
+      "albumId": "ApWf9DIu4w0",
+      "title": "עובד",
+      "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
+      "thumbnailUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
+      "id": "2_RYGC-6J2I"
+    },
+    {
+      "albumId": "_nXdLbfjzEI",
+      "title": "עובד אבל אי אפשר לערוך שם של אלבו של תמונה אפשר",
+      "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
+      "thumbnailUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrSNq0bxjmm9_mPOz_BeYXcOBwGA9MwlC41g&s",
+      "id": "gFxKnOtfoLs"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

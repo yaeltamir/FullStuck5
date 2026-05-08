@@ -1,55 +1,92 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { apiGet } from "../api/api";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   async function handleLogin(e) {
     e.preventDefault();
+
     setError("");
 
-    const response = await fetch("https://jsonplaceholder.typicode.com/users");
-    const users = await response.json();
+    try {
+      const serverUsers = await apiGet("/users");
 
-    const foundUser = users.find(
-      (user) => user.username === username && user.website === password
-    );
+      const localUsers =
+        JSON.parse(localStorage.getItem("users")) || [];
 
-    if (!foundUser) {
-      setError("שם משתמש או סיסמה אינם נכונים");
-      return;
+      const allUsers = [...serverUsers, ...localUsers];
+
+      const foundUser = allUsers.find((user) => {
+        if (user.password) {
+          return (
+            user.username === username &&
+            user.password === password
+          );
+        }
+
+        return (
+          user.username === username &&
+          user.website === password
+        );
+      });
+
+      if (!foundUser) {
+        setError("Invalid username or password");
+        return;
+      }
+
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify(foundUser)
+      );
+
+      navigate("/home");
+    } catch (err) {
+      setError("Login failed");
     }
-
-    localStorage.setItem("currentUser", JSON.stringify(foundUser));
-    navigate("/home");
   }
 
   return (
-    <div>
-      <h1>Login</h1>
+    <div className="page">
+      <div className="card">
+        <h1>Login</h1>
 
-      <form onSubmit={handleLogin}>
-        <input
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+        <form onSubmit={handleLogin}>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-        <input
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <button type="submit">Login</button>
-      </form>
+          <button type="submit">
+            Login
+          </button>
+        </form>
 
-      {error && <p>{error}</p>}
+        {error && <p className="error">{error}</p>}
 
-      <Link to="/register">Register</Link>
+        <p>
+          Don't have an account?
+        </p>
+
+        <Link to="/register">
+          Register
+        </Link>
+      </div>
     </div>
   );
 }
