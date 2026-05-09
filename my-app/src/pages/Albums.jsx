@@ -113,6 +113,14 @@ export default function Albums() {
     setPhotos(data);
 
     setVisibleCount(5);
+
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+
+    }, 100);
   }
 
   // ======================
@@ -376,18 +384,17 @@ export default function Albums() {
 
     <div>
 
-      <h1>
+      <h2>
         Albums
-      </h1>
+      </h2>
+      <hr />
 
       <button
         onClick={addAlbum}
       >
         Add Album
       </button>
-
-      <br />
-      <br />
+      <hr />
 
       <input
         placeholder="
@@ -401,8 +408,6 @@ export default function Albums() {
         }
       />
 
-      <hr />
-
       {/* ALBUMS */}
 
       {filteredAlbums.map(
@@ -413,31 +418,42 @@ export default function Albums() {
           className="card"
         >
 
-          <button
-            onClick={() =>
-              selectAlbum(album)
-            }
-          >
-            {album.title}
-          </button>
+          <div className="item-row">
 
-          <button
-            onClick={() =>
-              updateAlbum(album)
-            }
-          >
-            Edit
-          </button>
+            <button
+              className="item-title-btn"
+              onClick={() =>
+                selectAlbum(album)
+              }
+            >
+              📁 {album.title}
+            </button>
 
-          <button
-            onClick={() =>
-              deleteAlbum(
-                album.id
-              )
-            }
-          >
-            Delete
-          </button>
+            <div className="item-actions">
+
+              <button
+                className="btn-secondary"
+                onClick={() =>
+                  updateAlbum(album)
+                }
+              >
+                Edit
+              </button>
+
+              <button
+                className="btn-danger"
+                onClick={() =>
+                  deleteAlbum(
+                    album.id
+                  )
+                }
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </div>
 
         </div>
       ))}
@@ -496,7 +512,7 @@ export default function Albums() {
                   {photo.title}
                 </p>
 
-                <button
+                <button className="btn-secondary"
                   onClick={() =>
                     updatePhoto(
                       photo
@@ -506,7 +522,7 @@ export default function Albums() {
                   Edit
                 </button>
 
-                <button
+                <button className="btn-danger"
                   onClick={() =>
                     deletePhoto(
                       photo.id

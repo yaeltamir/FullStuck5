@@ -41,7 +41,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-
+{/* 
         <Route
           index
           element={
@@ -49,7 +49,7 @@ export default function App() {
               Welcome to your dashboard
             </h2>
           }
-        />
+        /> */}
 
       </Route>
 

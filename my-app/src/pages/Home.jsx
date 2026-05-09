@@ -162,27 +162,56 @@ export default function Home() {
           Dashboard
         </h2>
 
-        <Link to="/home">
+        <Link
+          to="/home"
+          className={
+            location.pathname === "/home"
+              ? "active-link"
+              : ""
+          }
+        >
           Home
         </Link>
 
-        <Link to="/todos">
+        <Link
+          to="/todos"
+          className={
+            location.pathname === "/todos"
+              ? "active-link"
+              : ""
+          }
+        >
           Todos
         </Link>
 
-        <Link to="/posts">
+        <Link
+          to="/posts"
+          className={
+            location.pathname === "/posts"
+              ? "active-link"
+              : ""
+          }
+        >
           Posts
         </Link>
 
-        <Link to="/albums">
+        <Link
+          to="/albums"
+          className={
+            location.pathname === "/albums"
+              ? "active-link"
+              : ""
+          }
+        >
           Albums
         </Link>
 
-        <button
+       <button
+          className="btn-danger logout-btn"
           onClick={logout}
         >
           Logout
-        </button>
+       </button>
 
       </aside>
 
@@ -194,52 +223,54 @@ export default function Home() {
           Welcome {user.name}
         </h1>
 
-        <p>
-          Current Page:
-          {" "}
-          {location.pathname}
-        </p>
-
         {location.pathname ===
           "/home" && (
 
-          <div className="card">
+          <>
 
             <h2>
-              User Info
+              Welcome to your dashboard
             </h2>
 
-            <p>
-              <b>Name:</b>
-              {" "}
-              {user.name}
-            </p>
+            <div className="card">
 
-            <p>
-              <b>Email:</b>
-              {" "}
-              {user.email}
-            </p>
 
-            <p>
-              <b>Phone:</b>
-              {" "}
-              {user.phone}
-            </p>
+              <h2>
+                User Info
+              </h2>
 
-            <p>
-              <b>Username:</b>
-              {" "}
-              {user.username}
-            </p>
+              <p>
+                <b>Name:</b>
+                {" "}
+                {user.name}
+              </p>
 
-            <button
-              onClick={editUser}
-            >
-              Edit Profile
-            </button>
+              <p>
+                <b>Email:</b>
+                {" "}
+                {user.email}
+              </p>
 
-          </div>
+              <p>
+                <b>Phone:</b>
+                {" "}
+                {user.phone}
+              </p>
+
+              <p>
+                <b>Username:</b>
+                {" "}
+                {user.username}
+              </p>
+
+              <button
+                onClick={editUser}
+              >
+                Edit Profile
+              </button>
+
+            </div>
+          </>
         )}
 
         <Outlet />

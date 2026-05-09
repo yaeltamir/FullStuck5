@@ -33,6 +33,7 @@ export default function Posts() {
     setNewComment] =
     useState("");
 
+
   // ======================
   // POST MODAL
   // ======================
@@ -52,6 +53,9 @@ export default function Posts() {
   const [editingPost,
     setEditingPost] =
     useState(null);
+
+  const [users, setUsers] =
+    useState([]);
 
   // ======================
   // COMMENT MODAL
@@ -87,11 +91,10 @@ export default function Posts() {
 
   async function loadPosts() {
 
-    const data = await apiGet(
-      "/posts"
-    );
-
+    const data = await apiGet("/posts");
     setPosts(data);
+    const usersData = await apiGet("/users");
+    setUsers(usersData);
   }
 
   // ======================
@@ -372,108 +375,128 @@ export default function Posts() {
         currentUser.id
     );
 
+  const postOwner =
+    users.find(
+      (u) =>
+        u.id ===
+        selectedPost?.userId
+    );
+
   return (
 
     <div>
 
-      <h1>
+    {!selectedPost && (
+        <>
+      <h2>
         Posts
-      </h1>
-
-      <input
-        placeholder="Search..."
-        value={search}
-        onChange={(e) =>
-          setSearch(
-            e.target.value
-          )
-        }
-      />
-
-      <hr />
-
-      <button
-        onClick={addPost}
-      >
-        Add Post
-      </button>
-
-      <hr />
-
-      {/* MY POSTS */}
-
-      <h2>
-        My Posts
       </h2>
 
-      {myPosts.map((post) => (
-
-        <div
-          key={post.id}
-          className="card"
-        >
-
+        <hr />
           <button
-            onClick={() =>
-              selectPost(post)
-            }
+            onClick={addPost}
           >
-            {post.id}
-            {" - "}
-            {post.title}
+            Add Post
           </button>
+        <hr />
 
-          <button
-            onClick={() =>
-              updatePost(post)
-            }
+        <input
+          placeholder="Search..."
+          value={search}
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+        />
+  
+        {/* MY POSTS */}
+        <h2>
+          My Posts
+        </h2>
+
+        {myPosts.map((post) => (
+
+          <div
+            key={post.id}
+            className="card"
           >
-            Edit
-          </button>
 
-          <button
-            onClick={() =>
-              deletePost(
-                post.id
-              )
-            }
+            <div className="item-row">
+
+              <button
+                className="item-title-btn"
+                onClick={() =>
+                  selectPost(post)
+                }
+              >
+                📝 {post.title}
+              </button>
+
+              <div className="item-actions">
+
+                <button
+                  className="btn-secondary"
+                  onClick={() =>
+                    updatePost(post)
+                  }
+                >
+                  Edit
+                </button>
+
+                <button
+                  className="btn-danger"
+                  onClick={() =>
+                    deletePost(
+                      post.id
+                    )
+                  }
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        ))}
+
+        <hr />
+
+        {/* COMMUNITY POSTS */}
+
+        <h2>
+          Community Posts
+        </h2>
+
+        {communityPosts.map(
+          (post) => (
+
+          <div
+            key={post.id}
+            className="card"
           >
-            Delete
-          </button>
 
-        </div>
-      ))}
+            <div className="item-row">
 
-      <hr />
+              <button
+                className="item-title-btn"
+                onClick={() =>
+                  selectPost(post)
+                }
+              >
+                🌍 {post.title}
+              </button>
 
-      {/* COMMUNITY POSTS */}
+            </div>
 
-      <h2>
-        Community Posts
-      </h2>
+          </div>
+        ))}
 
-      {communityPosts.map(
-        (post) => (
-
-        <div
-          key={post.id}
-          className="card"
-        >
-
-          <button
-            onClick={() =>
-              selectPost(post)
-            }
-          >
-            {post.id}
-            {" - "}
-            {post.title}
-          </button>
-
-        </div>
-      ))}
-
-      <hr />
+        <hr />
+        </>
+      )}
 
       {/* SELECTED POST */}
 
@@ -481,6 +504,23 @@ export default function Posts() {
 
         <div className="card">
 
+          <button
+            className="btn-secondary"
+            onClick={() =>
+              setSelectedPost(null)
+            }
+          >
+            ← Back to Posts
+          </button>
+          <h3>
+
+          {postOwner
+            ? `${postOwner.name}'s Post`
+            : "Post"}
+
+        </h3>
+          <br />
+          <hr />
           <h2>
             {
               selectedPost.title
@@ -543,7 +583,7 @@ export default function Posts() {
 
                 <>
 
-                  <button
+                  <button className="btn-secondary"
                     onClick={() =>
                       updateComment(
                         comment
@@ -553,7 +593,7 @@ export default function Posts() {
                     Edit
                   </button>
 
-                  <button
+                  <button className="btn-danger"
                     onClick={() =>
                       deleteComment(
                         comment.id

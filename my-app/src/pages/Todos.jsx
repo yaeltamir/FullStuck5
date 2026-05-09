@@ -284,9 +284,11 @@ export default function Todos() {
 
     <div>
 
-      <h1>
+      <h2>
         Todos
-      </h1>
+      </h2>
+
+      <hr />
 
       {/* ADD */}
 
@@ -295,9 +297,7 @@ export default function Todos() {
       >
         Add Todo
       </button>
-
       <hr />
-
       {/* SEARCH */}
 
       <input
@@ -371,49 +371,61 @@ export default function Todos() {
 
         <div
           key={todo.id}
-          className="card"
+          className="card todo-card"
         >
 
-          <input
-            type="checkbox"
-            checked={
-              todo.completed
-            }
-            onChange={() =>
-              toggleTodo(
-                todo.id
-              )
-            }
-          />
+          <div className="todo-left">
 
-          <span
-            style={{
-              textDecoration:
+            <input
+              type="checkbox"
+              checked={
                 todo.completed
-                  ? "line-through"
-                  : "none",
-            }}
-          >
-            {todo.title}
-          </span>
+              }
+              onChange={() =>
+                toggleTodo(
+                  todo.id
+                )
+              }
+              className="todo-checkbox"
+            />
 
-          <button
-            onClick={() =>
-              updateTodo(todo)
-            }
-          >
-            Edit
-          </button>
+            <span
+              className="todo-title"
+              style={{
+                textDecoration:
+                  todo.completed
+                    ? "line-through"
+                    : "none",
+              }}
+            >
+              {todo.title}
+            </span>
 
-          <button
-            onClick={() =>
-              deleteTodo(
-                todo.id
-              )
-            }
-          >
-            ❌
-          </button>
+          </div>
+
+          <div className="todo-actions">
+
+            <button
+              className="btn-secondary"
+              onClick={() =>
+                updateTodo(todo)
+              }
+            >
+              Edit
+            </button>
+
+            <button
+              className="btn-danger"
+              onClick={() =>
+                deleteTodo(
+                  todo.id
+                )
+              }
+            >
+              Delete
+            </button>
+
+          </div>
 
         </div>
       ))}
