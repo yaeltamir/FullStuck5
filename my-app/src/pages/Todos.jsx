@@ -1,4 +1,9 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import Modal from "../pages/Modal";
 
 import {
   apiGet,
@@ -9,17 +14,40 @@ import {
 
 export default function Todos() {
 
-  const [todos, setTodos] = useState([]);
-  const [newTodo, setNewTodo] = useState("");
+  const [todos, setTodos] =
+    useState([]);
 
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("id");
+  const [search, setSearch] =
+    useState("");
+
+  const [filter, setFilter] =
+    useState("all");
+
+  const [sortBy, setSortBy] =
+    useState("id");
+
+  // ======================
+  // TODO MODAL
+  // ======================
+
+  const [showTodoModal,
+    setShowTodoModal] =
+    useState(false);
+
+  const [todoTitle,
+    setTodoTitle] =
+    useState("");
+
+  const [editingTodo,
+    setEditingTodo] =
+    useState(null);
 
   useEffect(() => {
 
     const user = JSON.parse(
-      localStorage.getItem("currentUser")
+      localStorage.getItem(
+        "currentUser"
+      )
     );
 
     if (!user) return;
@@ -28,7 +56,13 @@ export default function Todos() {
 
   }, []);
 
-  async function loadTodos(userId) {
+  // ======================
+  // LOAD TODOS
+  // ======================
+
+  async function loadTodos(
+    userId
+  ) {
 
     const data = await apiGet(
       `/todos?userId=${userId}`
@@ -37,45 +71,122 @@ export default function Todos() {
     setTodos(data);
   }
 
-  // ➕ ADD
-  async function addTodo() {
+  // ======================
+  // ADD TODO
+  // ======================
 
-    if (!newTodo.trim()) return;
+  function addTodo() {
+
+    setEditingTodo(null);
+
+    setTodoTitle("");
+
+    setShowTodoModal(true);
+  }
+
+  // ======================
+  // EDIT TODO
+  // ======================
+
+  function updateTodo(todo) {
+
+    setEditingTodo(todo);
+
+    setTodoTitle(todo.title);
+
+    setShowTodoModal(true);
+  }
+
+  // ======================
+  // SAVE TODO
+  // ======================
+
+  async function saveTodo() {
+
+    if (!todoTitle.trim()) {
+      return;
+    }
 
     const user = JSON.parse(
-      localStorage.getItem("currentUser")
+      localStorage.getItem(
+        "currentUser"
+      )
     );
 
-    const todo = {
-      userId: user.id,
-      title: newTodo,
-      completed: false,
-    };
+    if (editingTodo) {
 
-    const savedTodo = await apiPost(
-      "/todos",
-      todo
-    );
+      const updatedTodo = {
 
-    setTodos((prev) => [
-      savedTodo,
-      ...prev,
-    ]);
+        ...editingTodo,
 
-    setNewTodo("");
+        title: todoTitle,
+      };
+
+      await apiPut(
+        `/todos/${editingTodo.id}`,
+        updatedTodo
+      );
+
+      setTodos((prev) =>
+        prev.map((t) =>
+          t.id ===
+          editingTodo.id
+            ? updatedTodo
+            : t
+        )
+      );
+
+    } else {
+
+      const todo = {
+
+        userId: user.id,
+
+        title: todoTitle,
+
+        completed: false,
+      };
+
+      const savedTodo =
+        await apiPost(
+          "/todos",
+          todo
+        );
+
+      setTodos((prev) => [
+        savedTodo,
+        ...prev,
+      ]);
+    }
+
+    setShowTodoModal(false);
+
+    setTodoTitle("");
+
+    setEditingTodo(null);
   }
 
-  // ❌ DELETE
+  // ======================
+  // DELETE TODO
+  // ======================
+
   async function deleteTodo(id) {
 
-    await apiDelete(`/todos/${id}`);
+    await apiDelete(
+      `/todos/${id}`
+    );
 
     setTodos((prev) =>
-      prev.filter((t) => t.id !== id)
+      prev.filter(
+        (t) => t.id !== id
+      )
     );
   }
 
-  // ✔️ TOGGLE
+  // ======================
+  // TOGGLE TODO
+  // ======================
+
   async function toggleTodo(id) {
 
     const todo = todos.find(
@@ -83,8 +194,11 @@ export default function Todos() {
     );
 
     const updatedTodo = {
+
       ...todo,
-      completed: !todo.completed,
+
+      completed:
+        !todo.completed,
     };
 
     await apiPut(
@@ -101,130 +215,139 @@ export default function Todos() {
     );
   }
 
-  // ✏️ UPDATE
-  async function updateTodo(id) {
+  // ======================
+  // FILTER + SORT
+  // ======================
 
-    const todo = todos.find(
-      (t) => t.id === id
-    );
+  const processedTodos =
+    todos
 
-    const newTitle = prompt(
-      "Edit todo:",
-      todo.title
-    );
+      .filter((t) =>
 
-    if (!newTitle?.trim()) return;
+        t.title
+          .toLowerCase()
+          .includes(
+            search.toLowerCase()
+          ) ||
 
-    const updatedTodo = {
-      ...todo,
-      title: newTitle,
-    };
-
-    await apiPut(
-      `/todos/${id}`,
-      updatedTodo
-    );
-
-    setTodos((prev) =>
-      prev.map((t) =>
-        t.id === id
-          ? updatedTodo
-          : t
+        String(t.id)
+          .includes(search)
       )
-    );
-  }
 
-  // 🔍 FILTER + SORT
-  const processedTodos = todos
+      .filter((t) => {
 
-    .filter((t) =>
-      t.title
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
+        if (
+          filter ===
+          "completed"
+        ) {
+          return t.completed;
+        }
 
-      String(t.id).includes(search)
-    )
+        if (
+          filter ===
+          "active"
+        ) {
+          return !t.completed;
+        }
 
-    .filter((t) => {
+        return true;
+      })
 
-      if (filter === "completed") {
-        return t.completed;
-      }
+      .sort((a, b) => {
 
-      if (filter === "active") {
-        return !t.completed;
-      }
+        if (
+          sortBy ===
+          "title"
+        ) {
 
-      return true;
-    })
+          return a.title
+            .localeCompare(
+              b.title
+            );
+        }
 
-    .sort((a, b) => {
+        if (
+          sortBy ===
+          "status"
+        ) {
 
-      if (sortBy === "title") {
-        return a.title.localeCompare(b.title);
-      }
+          return (
+            a.completed -
+            b.completed
+          );
+        }
 
-      if (sortBy === "completed") {
-        return a.completed - b.completed;
-      }
-
-      return a.id - b.id;
-    });
+        return a.id - b.id;
+      });
 
   return (
+
     <div>
 
-      <h1>Todos</h1>
+      <h1>
+        Todos
+      </h1>
 
       {/* ADD */}
-      <input
-        value={newTodo}
-        onChange={(e) =>
-          setNewTodo(e.target.value)
-        }
-        placeholder="Add todo..."
-      />
 
-      <button onClick={addTodo}>
-        Add
+      <button
+        onClick={addTodo}
+      >
+        Add Todo
       </button>
 
       <hr />
 
       {/* SEARCH */}
+
       <input
         placeholder="Search..."
         value={search}
         onChange={(e) =>
-          setSearch(e.target.value)
+          setSearch(
+            e.target.value
+          )
         }
       />
 
       {/* FILTER */}
+
       <select
+        value={filter}
         onChange={(e) =>
-          setFilter(e.target.value)
+          setFilter(
+            e.target.value
+          )
         }
       >
+
         <option value="all">
           All
         </option>
 
-        <option value="completed">
+        <option
+          value="completed"
+        >
           Completed
         </option>
 
         <option value="active">
           Active
         </option>
+
       </select>
 
       {/* SORT */}
+
       <select
+        value={sortBy}
         onChange={(e) =>
-          setSortBy(e.target.value)
+          setSortBy(
+            e.target.value
+          )
         }
       >
+
         <option value="id">
           ID
         </option>
@@ -233,23 +356,33 @@ export default function Todos() {
           Title
         </option>
 
-        <option value="completed">
-          Completed
+        <option value="status">
+          Status
         </option>
+
       </select>
 
       <hr />
 
-      {/* LIST */}
-      {processedTodos.map((todo) => (
+      {/* TODOS */}
 
-        <div key={todo.id}>
+      {processedTodos.map(
+        (todo) => (
+
+        <div
+          key={todo.id}
+          className="card"
+        >
 
           <input
             type="checkbox"
-            checked={todo.completed}
+            checked={
+              todo.completed
+            }
             onChange={() =>
-              toggleTodo(todo.id)
+              toggleTodo(
+                todo.id
+              )
             }
           />
 
@@ -266,7 +399,7 @@ export default function Todos() {
 
           <button
             onClick={() =>
-              updateTodo(todo.id)
+              updateTodo(todo)
             }
           >
             Edit
@@ -274,7 +407,9 @@ export default function Todos() {
 
           <button
             onClick={() =>
-              deleteTodo(todo.id)
+              deleteTodo(
+                todo.id
+              )
             }
           >
             ❌
@@ -282,6 +417,50 @@ export default function Todos() {
 
         </div>
       ))}
+
+      {/* ====================== */}
+      {/* TODO MODAL */}
+      {/* ====================== */}
+
+      <Modal
+        isOpen={
+          showTodoModal
+        }
+        onClose={() =>
+          setShowTodoModal(
+            false
+          )
+        }
+      >
+
+        <h2>
+          {editingTodo
+            ? "Edit Todo"
+            : "Add Todo"}
+        </h2>
+
+        <input
+          value={todoTitle}
+          onChange={(e) =>
+            setTodoTitle(
+              e.target.value
+            )
+          }
+          placeholder="
+            Todo title
+          "
+        />
+
+        <br />
+        <br />
+
+        <button
+          onClick={saveTodo}
+        >
+          Save
+        </button>
+
+      </Modal>
 
     </div>
   );

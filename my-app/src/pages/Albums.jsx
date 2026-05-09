@@ -3,6 +3,8 @@ import {
   useState,
 } from "react";
 
+import Modal from "../pages/Modal";
+
 import {
   apiGet,
   apiPost,
@@ -29,6 +31,42 @@ export default function Albums() {
     setVisibleCount] =
     useState(5);
 
+  // ======================
+  // ALBUM MODAL
+  // ======================
+
+  const [showAlbumModal,
+    setShowAlbumModal] =
+    useState(false);
+
+  const [albumTitle,
+    setAlbumTitle] =
+    useState("");
+
+  const [editingAlbum,
+    setEditingAlbum] =
+    useState(null);
+
+  // ======================
+  // PHOTO MODAL
+  // ======================
+
+  const [showPhotoModal,
+    setShowPhotoModal] =
+    useState(false);
+
+  const [photoTitle,
+    setPhotoTitle] =
+    useState("");
+
+  const [photoUrl,
+    setPhotoUrl] =
+    useState("");
+
+  const [editingPhoto,
+    setEditingPhoto] =
+    useState(null);
+
   const currentUser = JSON.parse(
     localStorage.getItem(
       "currentUser"
@@ -43,6 +81,10 @@ export default function Albums() {
 
   }, []);
 
+  // ======================
+  // LOAD ALBUMS
+  // ======================
+
   async function loadAlbums() {
 
     const data = await apiGet(
@@ -51,6 +93,10 @@ export default function Albums() {
 
     setAlbums(data);
   }
+
+  // ======================
+  // SELECT ALBUM
+  // ======================
 
   async function selectAlbum(album) {
 
@@ -69,17 +115,43 @@ export default function Albums() {
     setVisibleCount(5);
   }
 
-  async function addAlbum() {
+  // ======================
+  // ADD ALBUM
+  // ======================
 
-    const title = prompt(
-      "Album title:"
-    );
+  function addAlbum() {
 
-    if (!title?.trim()) {
+    setEditingAlbum(null);
+
+    setAlbumTitle("");
+
+    setShowAlbumModal(true);
+  }
+
+  // ======================
+  // EDIT ALBUM
+  // ======================
+
+  function updateAlbum(album) {
+
+    setEditingAlbum(album);
+
+    setAlbumTitle(album.title);
+
+    setShowAlbumModal(true);
+  }
+
+  // ======================
+  // SAVE ALBUM
+  // ======================
+
+  async function saveAlbum() {
+
+    if (!albumTitle.trim()) {
       return;
     }
 
-    if (title.length < 2) {
+    if (albumTitle.length < 2) {
 
       alert(
         "Album title too short"
@@ -88,51 +160,43 @@ export default function Albums() {
       return;
     }
 
-    const newAlbum = {
-      userId: currentUser.id,
-      title,
-    };
+    if (editingAlbum) {
 
-    await apiPost(
-      "/albums",
-      newAlbum
-    );
+      const updatedAlbum = {
 
-    await loadAlbums();
-  }
+        ...editingAlbum,
 
-  async function updateAlbum(album) {
+        title: albumTitle,
+      };
 
-    const title = prompt(
-      "New album title:",
-      album.title
-    );
-
-    if (!title?.trim()) {
-      return;
-    }
-
-    const updatedAlbum = {
-      ...album,
-      title,
-    };
-
-    await apiPut(
-      `/albums/${album.id}`,
-      updatedAlbum
-    );
-
-    await loadAlbums();
-
-    if (
-      selectedAlbum?.id ===
-      album.id
-    ) {
-      setSelectedAlbum(
+      await apiPut(
+        `/albums/${editingAlbum.id}`,
         updatedAlbum
       );
+
+    } else {
+
+      await apiPost(
+        "/albums",
+        {
+          userId: currentUser.id,
+          title: albumTitle,
+        }
+      );
     }
+
+    await loadAlbums();
+
+    setShowAlbumModal(false);
+
+    setAlbumTitle("");
+
+    setEditingAlbum(null);
   }
+
+  // ======================
+  // DELETE ALBUM
+  // ======================
 
   async function deleteAlbum(id) {
 
@@ -149,34 +213,68 @@ export default function Albums() {
     if (
       selectedAlbum?.id === id
     ) {
+
       setSelectedAlbum(null);
+
       setPhotos([]);
     }
   }
 
-  async function addPhoto() {
+  // ======================
+  // ADD PHOTO
+  // ======================
+
+  function addPhoto() {
 
     if (!selectedAlbum?.id) {
       return;
     }
 
-    const title = prompt(
-      "Photo title:"
-    );
+    setEditingPhoto(null);
 
-    const url = prompt(
-      "Photo URL:"
-    );
+    setPhotoTitle("");
+
+    setPhotoUrl("");
+
+    setShowPhotoModal(true);
+  }
+
+  // ======================
+  // EDIT PHOTO
+  // ======================
+
+  function updatePhoto(photo) {
+
+    setEditingPhoto(photo);
+
+    setPhotoTitle(photo.title);
+
+    setPhotoUrl(photo.url);
+
+    setShowPhotoModal(true);
+  }
+
+  // ======================
+  // SAVE PHOTO
+  // ======================
+
+  async function savePhoto() {
+
+    if (!selectedAlbum?.id) {
+      return;
+    }
 
     if (
-      !title?.trim() ||
-      !url?.trim()
+      !photoTitle.trim() ||
+      !photoUrl.trim()
     ) {
       return;
     }
 
     if (
-      !url.startsWith("http")
+      !photoUrl.startsWith(
+        "http"
+      )
     ) {
 
       alert(
@@ -186,27 +284,59 @@ export default function Albums() {
       return;
     }
 
-    const newPhoto = {
+    if (editingPhoto) {
 
-      albumId:
-        selectedAlbum.id,
+      const updatedPhoto = {
 
-      title,
+        ...editingPhoto,
 
-      url,
+        title: photoTitle,
 
-      thumbnailUrl: url,
-    };
+        url: photoUrl,
 
-    await apiPost(
-      "/photos",
-      newPhoto
-    );
+        thumbnailUrl:
+          photoUrl,
+      };
+
+      await apiPut(
+        `/photos/${editingPhoto.id}`,
+        updatedPhoto
+      );
+
+    } else {
+
+      await apiPost(
+        "/photos",
+        {
+          albumId:
+            selectedAlbum.id,
+
+          title: photoTitle,
+
+          url: photoUrl,
+
+          thumbnailUrl:
+            photoUrl,
+        }
+      );
+    }
 
     await selectAlbum(
       selectedAlbum
     );
+
+    setShowPhotoModal(false);
+
+    setPhotoTitle("");
+
+    setPhotoUrl("");
+
+    setEditingPhoto(null);
   }
+
+  // ======================
+  // DELETE PHOTO
+  // ======================
 
   async function deletePhoto(id) {
 
@@ -221,31 +351,9 @@ export default function Albums() {
     );
   }
 
-  async function updatePhoto(photo) {
-
-    const title = prompt(
-      "New title:",
-      photo.title
-    );
-
-    if (!title?.trim()) {
-      return;
-    }
-
-    const updatedPhoto = {
-      ...photo,
-      title,
-    };
-
-    await apiPut(
-      `/photos/${photo.id}`,
-      updatedPhoto
-    );
-
-    await selectAlbum(
-      selectedAlbum
-    );
-  }
+  // ======================
+  // SEARCH
+  // ======================
 
   const filteredAlbums =
     albums.filter((album) => {
@@ -282,7 +390,9 @@ export default function Albums() {
       <br />
 
       <input
-        placeholder="Search album..."
+        placeholder="
+          Search album...
+        "
         value={search}
         onChange={(e) =>
           setSearch(
@@ -293,15 +403,14 @@ export default function Albums() {
 
       <hr />
 
+      {/* ALBUMS */}
+
       {filteredAlbums.map(
         (album) => (
 
         <div
           key={album.id}
-          style={{
-            marginBottom:
-              "10px",
-          }}
+          className="card"
         >
 
           <button
@@ -334,6 +443,8 @@ export default function Albums() {
       ))}
 
       <hr />
+
+      {/* PHOTOS */}
 
       {selectedAlbum && (
 
@@ -378,6 +489,7 @@ export default function Albums() {
                   alt={
                     photo.title
                   }
+                  width="200"
                 />
 
                 <p>
@@ -428,6 +540,100 @@ export default function Albums() {
 
         </div>
       )}
+
+      {/* ====================== */}
+      {/* ALBUM MODAL */}
+      {/* ====================== */}
+
+      <Modal
+        isOpen={
+          showAlbumModal
+        }
+        onClose={() =>
+          setShowAlbumModal(
+            false
+          )
+        }
+      >
+
+        <h2>
+          {editingAlbum
+            ? "Edit Album"
+            : "Add Album"}
+        </h2>
+
+        <input
+          value={albumTitle}
+          onChange={(e) =>
+            setAlbumTitle(
+              e.target.value
+            )
+          }
+          placeholder="
+            Album title
+          "
+        />
+
+        <button
+          onClick={saveAlbum}
+        >
+          Save
+        </button>
+
+      </Modal>
+
+      {/* ====================== */}
+      {/* PHOTO MODAL */}
+      {/* ====================== */}
+
+      <Modal
+        isOpen={
+          showPhotoModal
+        }
+        onClose={() =>
+          setShowPhotoModal(
+            false
+          )
+        }
+      >
+
+        <h2>
+          {editingPhoto
+            ? "Edit Photo"
+            : "Add Photo"}
+        </h2>
+
+        <input
+          value={photoTitle}
+          onChange={(e) =>
+            setPhotoTitle(
+              e.target.value
+            )
+          }
+          placeholder="
+            Photo title
+          "
+        />
+
+        <input
+          value={photoUrl}
+          onChange={(e) =>
+            setPhotoUrl(
+              e.target.value
+            )
+          }
+          placeholder="
+            Photo URL
+          "
+        />
+
+        <button
+          onClick={savePhoto}
+        >
+          Save
+        </button>
+
+      </Modal>
 
     </div>
   );

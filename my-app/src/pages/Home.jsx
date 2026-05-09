@@ -5,100 +5,162 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import Modal from "../pages/Modal";
+
+import {
+  apiGet,
+  apiPut,
+} from "../api/api";
 
 export default function Home() {
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] =
+    useState(null);
 
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate =
+    useNavigate();
+
+  const location =
+    useLocation();
+
+  // ======================
+  // PROFILE MODAL
+  // ======================
+
+  const [showProfileModal,
+    setShowProfileModal] =
+    useState(false);
+
+  const [name,
+    setName] =
+    useState("");
+
+  const [email,
+    setEmail] =
+    useState("");
+
+  const [phone,
+    setPhone] =
+    useState("");
 
   useEffect(() => {
 
     const savedUser =
-      localStorage.getItem("currentUser");
+      localStorage.getItem(
+        "currentUser"
+      );
 
     if (!savedUser) {
+
       navigate("/login");
+
       return;
     }
 
-    setUser(JSON.parse(savedUser));
+    setUser(
+      JSON.parse(savedUser)
+    );
 
   }, [navigate]);
 
+  // ======================
+  // LOGOUT
+  // ======================
+
   function logout() {
 
-    localStorage.removeItem("currentUser");
+    localStorage.removeItem(
+      "currentUser"
+    );
 
     navigate("/login");
   }
 
+  // ======================
+  // OPEN EDIT MODAL
+  // ======================
+
   function editUser() {
 
-    const newName = prompt(
-      "Name:",
-      user.name
-    );
+    setName(user.name);
 
-    const newEmail = prompt(
-      "Email:",
-      user.email
-    );
+    setEmail(user.email);
 
-    const newPhone = prompt(
-      "Phone:",
-      user.phone
-    );
+    setPhone(user.phone);
+
+    setShowProfileModal(true);
+  }
+
+  // ======================
+  // SAVE PROFILE
+  // ======================
+
+  async function saveProfile() {
 
     if (
-      !newName?.trim() ||
-      !newEmail?.trim()
+      !name.trim() ||
+      !email.trim()
     ) {
       return;
     }
 
+    if (
+      !email.includes("@")
+    ) {
+
+      alert(
+        "Invalid email"
+      );
+
+      return;
+    }
+
     const updatedUser = {
+
       ...user,
-      name: newName,
-      email: newEmail,
-      phone: newPhone,
+
+      name,
+
+      email,
+
+      phone,
     };
+
+    await apiPut(
+      `/users/${user.id}`,
+      updatedUser
+    );
 
     setUser(updatedUser);
 
     localStorage.setItem(
       "currentUser",
-      JSON.stringify(updatedUser)
+      JSON.stringify(
+        updatedUser
+      )
     );
 
-    const users =
-      JSON.parse(
-        localStorage.getItem("users")
-      ) || [];
-
-    const updatedUsers =
-      users.map((u) =>
-        u.id === updatedUser.id
-          ? updatedUser
-          : u
-      );
-
-    localStorage.setItem(
-      "users",
-      JSON.stringify(updatedUsers)
-    );
+    setShowProfileModal(false);
   }
 
   if (!user) return null;
 
   return (
+
     <div className="layout">
+
+      {/* SIDEBAR */}
 
       <aside className="sidebar">
 
-        <h2>Dashboard</h2>
+        <h2>
+          Dashboard
+        </h2>
 
         <Link to="/home">
           Home
@@ -116,11 +178,15 @@ export default function Home() {
           Albums
         </Link>
 
-        <button onClick={logout}>
+        <button
+          onClick={logout}
+        >
           Logout
         </button>
 
       </aside>
+
+      {/* MAIN */}
 
       <main className="content">
 
@@ -130,29 +196,41 @@ export default function Home() {
 
         <p>
           Current Page:
+          {" "}
           {location.pathname}
         </p>
 
-        {location.pathname === "/home" && (
+        {location.pathname ===
+          "/home" && (
 
           <div className="card">
 
-            <h2>User Info</h2>
+            <h2>
+              User Info
+            </h2>
 
             <p>
-              <b>Name:</b> {user.name}
+              <b>Name:</b>
+              {" "}
+              {user.name}
             </p>
 
             <p>
-              <b>Email:</b> {user.email}
+              <b>Email:</b>
+              {" "}
+              {user.email}
             </p>
 
             <p>
-              <b>Phone:</b> {user.phone}
+              <b>Phone:</b>
+              {" "}
+              {user.phone}
             </p>
 
             <p>
-              <b>Username:</b> {user.username}
+              <b>Username:</b>
+              {" "}
+              {user.username}
             </p>
 
             <button
@@ -167,6 +245,72 @@ export default function Home() {
         <Outlet />
 
       </main>
+
+      {/* ====================== */}
+      {/* PROFILE MODAL */}
+      {/* ====================== */}
+
+      <Modal
+        isOpen={
+          showProfileModal
+        }
+        onClose={() =>
+          setShowProfileModal(
+            false
+          )
+        }
+      >
+
+        <h2>
+          Edit Profile
+        </h2>
+
+        <input
+          value={name}
+          onChange={(e) =>
+            setName(
+              e.target.value
+            )
+          }
+          placeholder="Name"
+        />
+
+        <br />
+        <br />
+
+        <input
+          value={email}
+          onChange={(e) =>
+            setEmail(
+              e.target.value
+            )
+          }
+          placeholder="Email"
+        />
+
+        <br />
+        <br />
+
+        <input
+          value={phone}
+          onChange={(e) =>
+            setPhone(
+              e.target.value
+            )
+          }
+          placeholder="Phone"
+        />
+
+        <br />
+        <br />
+
+        <button
+          onClick={saveProfile}
+        >
+          Save
+        </button>
+
+      </Modal>
 
     </div>
   );

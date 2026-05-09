@@ -1,4 +1,9 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import Modal from "../pages/Modal";
 
 import {
   apiGet,
@@ -9,25 +14,65 @@ import {
 
 export default function Posts() {
 
-  const [posts, setPosts] = useState([]);
-  const [selectedPost, setSelectedPost] =
+  const [posts, setPosts] =
+    useState([]);
+
+  const [selectedPost,
+    setSelectedPost] =
     useState(null);
 
-  const [comments, setComments] = useState([]);
+  const [comments,
+    setComments] =
+    useState([]);
 
-  const [search, setSearch] = useState("");
-
-  const [newTitle, setNewTitle] =
+  const [search,
+    setSearch] =
     useState("");
 
-  const [newBody, setNewBody] =
+  const [newComment,
+    setNewComment] =
     useState("");
 
-  const [newComment, setNewComment] =
+  // ======================
+  // POST MODAL
+  // ======================
+
+  const [showPostModal,
+    setShowPostModal] =
+    useState(false);
+
+  const [postTitle,
+    setPostTitle] =
     useState("");
+
+  const [postBody,
+    setPostBody] =
+    useState("");
+
+  const [editingPost,
+    setEditingPost] =
+    useState(null);
+
+  // ======================
+  // COMMENT MODAL
+  // ======================
+
+  const [showCommentModal,
+    setShowCommentModal] =
+    useState(false);
+
+  const [commentBody,
+    setCommentBody] =
+    useState("");
+
+  const [editingComment,
+    setEditingComment] =
+    useState(null);
 
   const currentUser = JSON.parse(
-    localStorage.getItem("currentUser")
+    localStorage.getItem(
+      "currentUser"
+    )
   );
 
   useEffect(() => {
@@ -35,6 +80,10 @@ export default function Posts() {
     loadPosts();
 
   }, []);
+
+  // ======================
+  // LOAD POSTS
+  // ======================
 
   async function loadPosts() {
 
@@ -44,6 +93,10 @@ export default function Posts() {
 
     setPosts(data);
   }
+
+  // ======================
+  // SELECT POST
+  // ======================
 
   async function selectPost(post) {
 
@@ -56,35 +109,91 @@ export default function Posts() {
     setComments(data);
   }
 
-  async function addPost() {
+  // ======================
+  // ADD POST
+  // ======================
+
+  function addPost() {
+
+    setEditingPost(null);
+
+    setPostTitle("");
+
+    setPostBody("");
+
+    setShowPostModal(true);
+  }
+
+  // ======================
+  // EDIT POST
+  // ======================
+
+  function updatePost(post) {
+
+    setEditingPost(post);
+
+    setPostTitle(post.title);
+
+    setPostBody(post.body);
+
+    setShowPostModal(true);
+  }
+
+  // ======================
+  // SAVE POST
+  // ======================
+
+  async function savePost() {
 
     if (
-      !newTitle.trim() ||
-      !newBody.trim()
+      !postTitle.trim() ||
+      !postBody.trim()
     ) {
       return;
     }
 
-    const post = {
-      userId: currentUser.id,
-      title: newTitle,
-      body: newBody,
-    };
+    if (editingPost) {
 
-    const savedPost = await apiPost(
-      "/posts",
-      post
-    );
+      const updatedPost = {
 
-    setPosts((prev) => [
-      savedPost,
-      ...prev,
-    ]);
+        ...editingPost,
 
-    setNewTitle("");
-    setNewBody("");
+        title: postTitle,
+
+        body: postBody,
+      };
+
+      await apiPut(
+        `/posts/${editingPost.id}`,
+        updatedPost
+      );
+
+    } else {
+
+      await apiPost(
+        "/posts",
+        {
+          userId: currentUser.id,
+          title: postTitle,
+          body: postBody,
+        }
+      );
+    }
+
     await loadPosts();
+
+    setShowPostModal(false);
+
+    setPostTitle("");
+
+    setPostBody("");
+
+    setEditingPost(null);
   }
+
+  // ======================
+  // DELETE POST
+  // ======================
 
   async function deletePost(id) {
 
@@ -93,59 +202,24 @@ export default function Posts() {
     );
 
     setPosts((prev) =>
-      prev.filter((p) => p.id !== id)
+      prev.filter(
+        (p) => p.id !== id
+      )
     );
 
-    if (selectedPost?.id === id) {
+    if (
+      selectedPost?.id === id
+    ) {
+
       setSelectedPost(null);
+
       setComments([]);
     }
   }
 
-  async function updatePost(id) {
-
-    const post = posts.find(
-      (p) => p.id === id
-    );
-
-    const title = prompt(
-      "New title:",
-      post.title
-    );
-
-    const body = prompt(
-      "New body:",
-      post.body
-    );
-
-    if (
-      !title?.trim() ||
-      !body?.trim()
-    ) {
-      return;
-    }
-
-    const updatedPost = {
-      ...post,
-      title,
-      body,
-    };
-
-    await apiPut(
-      `/posts/${id}`,
-      updatedPost
-    );
-
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? updatedPost
-          : p
-      )
-    );
-
-    setSelectedPost(updatedPost);
-  }
+  // ======================
+  // ADD COMMENT
+  // ======================
 
   async function addComment() {
 
@@ -157,27 +231,98 @@ export default function Posts() {
     }
 
     const comment = {
-      postId: selectedPost.id,
-      userId: currentUser.id,
-      name: currentUser.name,
-      email: currentUser.email,
-      body: newComment,
+
+      postId:
+        selectedPost.id,
+
+      userId:
+        currentUser.id,
+
+      name:
+        currentUser.name,
+
+      email:
+        currentUser.email,
+
+      body:
+        newComment,
     };
 
-    const savedComment =
-      await apiPost(
-        "/comments",
-        comment
-      );
-
-    setComments((prev) => [
-      savedComment,
-      ...prev,
-    ]);
+    await apiPost(
+      "/comments",
+      comment
+    );
 
     setNewComment("");
-    await selectPost(selectedPost);  // refresh comments - only when doing something 
+
+    await selectPost(
+      selectedPost
+    );
   }
+
+  // ======================
+  // EDIT COMMENT
+  // ======================
+
+  function updateComment(
+    comment
+  ) {
+
+    setEditingComment(
+      comment
+    );
+
+    setCommentBody(
+      comment.body
+    );
+
+    setShowCommentModal(
+      true
+    );
+  }
+
+  // ======================
+  // SAVE COMMENT
+  // ======================
+
+  async function saveComment() {
+
+    if (
+      !commentBody.trim()
+    ) {
+      return;
+    }
+
+    const updatedComment = {
+
+      ...editingComment,
+
+      body: commentBody,
+    };
+
+    await apiPut(
+      `/comments/${editingComment.id}`,
+      updatedComment
+    );
+
+    await selectPost(
+      selectedPost
+    );
+
+    setShowCommentModal(
+      false
+    );
+
+    setCommentBody("");
+
+    setEditingComment(
+      null
+    );
+  }
+
+  // ======================
+  // DELETE COMMENT
+  // ======================
 
   async function deleteComment(id) {
 
@@ -186,43 +331,15 @@ export default function Posts() {
     );
 
     setComments((prev) =>
-      prev.filter((c) => c.id !== id)
-    );
-  }
-
-  async function updateComment(id) {
-
-    const comment = comments.find(
-      (c) => c.id === id
-    );
-
-    const body = prompt(
-      "New comment:",
-      comment.body
-    );
-
-    if (!body?.trim()) {
-      return;
-    }
-
-    const updatedComment = {
-      ...comment,
-      body,
-    };
-
-    await apiPut(
-      `/comments/${id}`,
-      updatedComment
-    );
-
-    setComments((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? updatedComment
-          : c
+      prev.filter(
+        (c) => c.id !== id
       )
     );
   }
+
+  // ======================
+  // SEARCH
+  // ======================
 
   const filteredPosts =
     posts.filter((post) => {
@@ -231,6 +348,7 @@ export default function Posts() {
         search.toLowerCase();
 
       return (
+
         post.title
           .toLowerCase()
           .includes(text) ||
@@ -243,77 +361,71 @@ export default function Posts() {
   const myPosts =
     filteredPosts.filter(
       (p) =>
-        p.userId === currentUser.id
+        p.userId ===
+        currentUser.id
     );
 
   const communityPosts =
     filteredPosts.filter(
       (p) =>
-        p.userId !== currentUser.id
+        p.userId !==
+        currentUser.id
     );
 
   return (
+
     <div>
 
-      <h1>Posts</h1>
+      <h1>
+        Posts
+      </h1>
 
       <input
         placeholder="Search..."
         value={search}
         onChange={(e) =>
-          setSearch(e.target.value)
+          setSearch(
+            e.target.value
+          )
         }
       />
 
       <hr />
 
-      <h2>Add Post</h2>
-
-      <input
-        placeholder="Title"
-        value={newTitle}
-        onChange={(e) =>
-          setNewTitle(e.target.value)
-        }
-      />
-
-      <br />
-      <br />
-
-      <textarea
-        placeholder="Body"
-        value={newBody}
-        onChange={(e) =>
-          setNewBody(e.target.value)
-        }
-      />
-
-      <br />
-      <br />
-
-      <button onClick={addPost}>
+      <button
+        onClick={addPost}
+      >
         Add Post
       </button>
 
       <hr />
 
-      <h2>My Posts</h2>
+      {/* MY POSTS */}
+
+      <h2>
+        My Posts
+      </h2>
 
       {myPosts.map((post) => (
 
-        <div key={post.id}>
+        <div
+          key={post.id}
+          className="card"
+        >
 
           <button
             onClick={() =>
               selectPost(post)
             }
           >
-            {post.id} - {post.title}
+            {post.id}
+            {" - "}
+            {post.title}
           </button>
 
           <button
             onClick={() =>
-              updatePost(post.id)
+              updatePost(post)
             }
           >
             Edit
@@ -321,7 +433,9 @@ export default function Posts() {
 
           <button
             onClick={() =>
-              deletePost(post.id)
+              deletePost(
+                post.id
+              )
             }
           >
             Delete
@@ -332,18 +446,28 @@ export default function Posts() {
 
       <hr />
 
-      <h2>Community Posts</h2>
+      {/* COMMUNITY POSTS */}
 
-      {communityPosts.map((post) => (
+      <h2>
+        Community Posts
+      </h2>
 
-        <div key={post.id}>
+      {communityPosts.map(
+        (post) => (
+
+        <div
+          key={post.id}
+          className="card"
+        >
 
           <button
             onClick={() =>
               selectPost(post)
             }
           >
-            {post.id} - {post.title}
+            {post.id}
+            {" - "}
+            {post.title}
           </button>
 
         </div>
@@ -351,24 +475,34 @@ export default function Posts() {
 
       <hr />
 
+      {/* SELECTED POST */}
+
       {selectedPost && (
 
-        <div>
+        <div className="card">
 
           <h2>
-            {selectedPost.title}
+            {
+              selectedPost.title
+            }
           </h2>
 
           <p>
-            {selectedPost.body}
+            {
+              selectedPost.body
+            }
           </p>
 
           <hr />
 
-          <h3>Comments</h3>
+          <h3>
+            Comments
+          </h3>
 
           <input
-            placeholder="Add comment..."
+            placeholder="
+              Add comment...
+            "
             value={newComment}
             onChange={(e) =>
               setNewComment(
@@ -386,16 +520,12 @@ export default function Posts() {
           <br />
           <br />
 
-          {comments.map((comment) => (
+          {comments.map(
+            (comment) => (
 
             <div
               key={comment.id}
-              style={{
-                border:
-                  "1px solid lightgray",
-                padding: "10px",
-                marginBottom: "10px",
-              }}
+              className="card"
             >
 
               <p>
@@ -416,7 +546,7 @@ export default function Posts() {
                   <button
                     onClick={() =>
                       updateComment(
-                        comment.id
+                        comment
                       )
                     }
                   >
@@ -441,6 +571,107 @@ export default function Posts() {
 
         </div>
       )}
+
+      {/* ====================== */}
+      {/* POST MODAL */}
+      {/* ====================== */}
+
+      <Modal
+        isOpen={
+          showPostModal
+        }
+        onClose={() =>
+          setShowPostModal(
+            false
+          )
+        }
+      >
+
+        <h2>
+          {editingPost
+            ? "Edit Post"
+            : "Add Post"}
+        </h2>
+
+        <input
+          value={postTitle}
+          onChange={(e) =>
+            setPostTitle(
+              e.target.value
+            )
+          }
+          placeholder="
+            Post title
+          "
+        />
+
+        <br />
+        <br />
+
+        <textarea
+          value={postBody}
+          onChange={(e) =>
+            setPostBody(
+              e.target.value
+            )
+          }
+          placeholder="
+            Post body
+          "
+        />
+
+        <br />
+        <br />
+
+        <button
+          onClick={savePost}
+        >
+          Save
+        </button>
+
+      </Modal>
+
+      {/* ====================== */}
+      {/* COMMENT MODAL */}
+      {/* ====================== */}
+
+      <Modal
+        isOpen={
+          showCommentModal
+        }
+        onClose={() =>
+          setShowCommentModal(
+            false
+          )
+        }
+      >
+
+        <h2>
+          Edit Comment
+        </h2>
+
+        <textarea
+          value={commentBody}
+          onChange={(e) =>
+            setCommentBody(
+              e.target.value
+            )
+          }
+          placeholder="
+            Comment
+          "
+        />
+
+        <br />
+        <br />
+
+        <button
+          onClick={saveComment}
+        >
+          Save
+        </button>
+
+      </Modal>
 
     </div>
   );
