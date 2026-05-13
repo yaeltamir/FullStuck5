@@ -14,24 +14,17 @@ import {
 
 export default function Posts() {
 
-  const [posts, setPosts] =
-    useState([]);
+  const [posts, setPosts] = useState([]);
 
-  const [selectedPost,
-    setSelectedPost] =
-    useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
 
-  const [comments,
-    setComments] =
-    useState([]);
+  const [comments, setComments] = useState([]);
 
-  const [search,
-    setSearch] =
-    useState("");
+  const [postOwner, setPostOwner] = useState(null); // New state for post owner
 
-  const [newComment,
-    setNewComment] =
-    useState("");
+  const [search, setSearch] = useState("");
+
+  const [newComment, setNewComment] =  useState("");
 
 
   // ======================
@@ -54,8 +47,8 @@ export default function Posts() {
     setEditingPost] =
     useState(null);
 
-  const [users, setUsers] =
-    useState([]);
+  // const [users, setUsers] =
+  //   useState([]);
 
   // ======================
   // COMMENT MODAL
@@ -93,8 +86,8 @@ export default function Posts() {
 
     const data = await apiGet("/posts");
     setPosts(data);
-    const usersData = await apiGet("/users");
-    setUsers(usersData);
+    // const usersData = await apiGet("/users");
+    // setUsers(usersData);
   }
 
   // ======================
@@ -103,7 +96,16 @@ export default function Posts() {
 
   async function selectPost(post) {
 
+    // if (selectedPost?.id === post.id) {
+    //   setSelectedPost(null);
+    //   setComments([]);
+    //   return;} 
+
     setSelectedPost(post);
+
+    const owner = await apiGet(`/users?id=${post.userId}`);
+
+    setPostOwner(owner[0]);
 
     const data = await apiGet(
       `/comments?postId=${post.id}`
@@ -198,7 +200,40 @@ export default function Posts() {
   // DELETE POST
   // ======================
 
+  // async function deletePost(id) {
+
+  //   await apiDelete(
+  //     `/posts/${id}`
+  //   );
+
+  //   setPosts((prev) =>
+  //     prev.filter(
+  //       (p) => p.id !== id
+  //     )
+  //   );
+
+  //   if (
+  //     selectedPost?.id === id
+  //   ) {
+
+  //     setSelectedPost(null);
+
+  //     setComments([]);
+  //   }
+  // }
   async function deletePost(id) {
+
+    const comments = await apiGet(
+      `/comments?postId=${id}`
+    );
+
+    await Promise.all(
+      comments.map((comment) =>
+        apiDelete(
+          `/comments/${comment.id}`
+        )
+      )
+    );
 
     await apiDelete(
       `/posts/${id}`
@@ -375,12 +410,12 @@ export default function Posts() {
         currentUser.id
     );
 
-  const postOwner =
-    users.find(
-      (u) =>
-        u.id ===
-        selectedPost?.userId
-    );
+  // const postOwner =
+  //   users.find(
+  //     (u) =>
+  //       u.id ===
+  //       selectedPost?.userId
+  //   );
 
   return (
 

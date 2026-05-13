@@ -29,7 +29,7 @@ export default function Albums() {
 
   const [visibleCount,
     setVisibleCount] =
-    useState(5);
+    useState(4);
 
   // ======================
   // ALBUM MODAL
@@ -112,7 +112,7 @@ export default function Albums() {
 
     setPhotos(data);
 
-    setVisibleCount(5);
+    setVisibleCount(4);
 
     setTimeout(() => {
       window.scrollTo({
@@ -206,7 +206,41 @@ export default function Albums() {
   // DELETE ALBUM
   // ======================
 
+  // async function deleteAlbum(id) {
+
+  //   await apiDelete(
+  //     `/albums/${id}`
+  //   );
+
+  //   setAlbums((prev) =>
+  //     prev.filter(
+  //       (a) => a.id !== id
+  //     )
+  //   );
+
+  //   if (
+  //     selectedAlbum?.id === id
+  //   ) {
+
+  //     setSelectedAlbum(null);
+
+  //     setPhotos([]);
+  //   }
+  // }
   async function deleteAlbum(id) {
+
+    const albumPhotos =
+      await apiGet(
+        `/photos?albumId=${id}`
+      );
+
+    await Promise.all(
+      albumPhotos.map((photo) =>
+        apiDelete(
+          `/photos/${photo.id}`
+        )
+      )
+    );
 
     await apiDelete(
       `/albums/${id}`
@@ -227,7 +261,6 @@ export default function Albums() {
       setPhotos([]);
     }
   }
-
   // ======================
   // ADD PHOTO
   // ======================
@@ -546,7 +579,7 @@ export default function Albums() {
                   (
                     prev
                   ) =>
-                    prev + 5
+                    prev + 4
                 )
               }
             >

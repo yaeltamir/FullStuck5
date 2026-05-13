@@ -49,25 +49,19 @@ export default function Login() {
 
     try {
 
-      const users =
-        await apiGet("/users");
+      const users = await apiGet(
+        `/users?username=${username}`
+      );
 
-      const foundUser =
-        users.find((user) =>
+      const foundUser = users[0];
 
-          user.username ===
-            username &&
-
-          (
-            user.password ===
-              password ||
-
-            user.website ===
-              password
-          )
-        );
-
-      if (!foundUser) {
+      if (
+        !foundUser ||
+        (
+          foundUser.password !== password &&
+          foundUser.website !== password
+        )
+      ) {
 
         setError(
           "Invalid username or password"

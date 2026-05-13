@@ -1,12 +1,6 @@
 // const BASE_URL = "http://localhost:3000";
 
-// const cache = {};
-
 // export async function apiGet(endpoint) {
-
-//   if (cache[endpoint]) {
-//     return cache[endpoint];
-//   }
 
 //   const response = await fetch(
 //     `${BASE_URL}${endpoint}`
@@ -16,11 +10,7 @@
 //     throw new Error("GET failed");
 //   }
 
-//   const data = await response.json();
-
-//   cache[endpoint] = data;
-
-//   return data;
+//   return response.json();
 // }
 
 // export async function apiPost(endpoint, body) {
@@ -41,16 +31,6 @@
 //   if (!response.ok) {
 //     throw new Error("POST failed");
 //   }
-
-//   // CLEAR RELEVANT CACHE
-//   Object.keys(cache).forEach((key) => {
-
-//     if (
-//       key.startsWith(endpoint)
-//     ) {
-//       delete cache[key];
-//     }
-//   });
 
 //   return response.json();
 // }
@@ -74,17 +54,6 @@
 //     throw new Error("PUT failed");
 //   }
 
-//   Object.keys(cache).forEach((key) => {
-
-//     if (
-//       key.includes(
-//         endpoint.split("/")[1]
-//       )
-//     ) {
-//       delete cache[key];
-//     }
-//   });
-
 //   return response.json();
 // }
 
@@ -100,22 +69,17 @@
 //   if (!response.ok) {
 //     throw new Error("DELETE failed");
 //   }
-
-//   Object.keys(cache).forEach((key) => {
-
-//     if (
-//       key.includes(
-//         endpoint.split("/")[1]
-//       )
-//     ) {
-//       delete cache[key];
-//     }
-//   });
 // }
 
 const BASE_URL = "http://localhost:3000";
 
+const cache = {};
+
 export async function apiGet(endpoint) {
+
+  if (cache[endpoint]) {
+    return cache[endpoint];
+  }
 
   const response = await fetch(
     `${BASE_URL}${endpoint}`
@@ -125,7 +89,11 @@ export async function apiGet(endpoint) {
     throw new Error("GET failed");
   }
 
-  return response.json();
+  const data = await response.json();
+
+  cache[endpoint] = data;
+
+  return data;
 }
 
 export async function apiPost(endpoint, body) {
@@ -146,6 +114,13 @@ export async function apiPost(endpoint, body) {
   if (!response.ok) {
     throw new Error("POST failed");
   }
+
+  Object.keys(cache).forEach((key) => {
+
+    if (key.startsWith(endpoint)) {
+      delete cache[key];
+    }
+  });
 
   return response.json();
 }
@@ -169,6 +144,13 @@ export async function apiPut(endpoint, body) {
     throw new Error("PUT failed");
   }
 
+  Object.keys(cache).forEach((key) => {
+
+    if (key.startsWith(`/${endpoint.split("/")[1]}`)){
+      delete cache[key];
+    }
+  });
+
   return response.json();
 }
 
@@ -184,4 +166,11 @@ export async function apiDelete(endpoint) {
   if (!response.ok) {
     throw new Error("DELETE failed");
   }
+
+  Object.keys(cache).forEach((key) => {
+
+    if (key.startsWith(`/${endpoint.split("/")[1]}`)) {
+      delete cache[key];
+    }
+  });
 }

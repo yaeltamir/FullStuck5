@@ -57,7 +57,9 @@ export default function Home() {
 
     if (!savedUser) {
 
-      navigate("/login");
+      navigate("/login", {
+        replace: true,
+      });
 
       return;
     }
@@ -78,7 +80,9 @@ export default function Home() {
       "currentUser"
     );
 
-    navigate("/login");
+    navigate("/login", {
+      replace: true,
+    });
   }
 
   // ======================
